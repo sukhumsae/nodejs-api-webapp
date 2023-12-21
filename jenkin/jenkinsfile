@@ -1,0 +1,21 @@
+pipeline {
+    agent any
+    stages{
+        stage('Build Image') {
+            steps {
+                git 'https://github.com/sukhumsae/nodejs-api-webapp.git'
+                sh 'docker build -t sukhumsae/test-app:v2'
+            }
+        }
+        stage('Push Docker Image') {
+            steps {
+                sh 'docker push sukhumsae/test-app:v2'
+            }
+        }
+        stage('Helm upgrade chart'){
+            steps {
+                sh 'helm upgrade --install test-app -n test-app-prod -f values.yaml .'
+            }
+        }
+    }
+}
