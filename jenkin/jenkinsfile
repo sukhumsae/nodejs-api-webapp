@@ -1,20 +1,44 @@
 pipeline {
     agent any
-    stages{
-        stage('Build Image') {
+
+    stages {
+        stage('Checkout') {
             steps {
-                git 'https://github.com/sukhumsae/nodejs-api-webapp.git'
-                sh 'docker build -t sukhumsae/test-app:v2'
+                script {
+                    // Define your GitHub repository URL
+                    def gitRepoUrl = 'https://github.com/sukhumsae/nodejs-api-webapp.git'
+
+                    // Checkout the code from the specified repository
+                    checkout([$class: 'GitSCM', branches: [[name: '*/main']], userRemoteConfigs: [[url: gitRepoUrl]]])
+                }
             }
         }
+
+        stage('Build Docker Image') {
+            steps {
+                script {
+                    dir('test-app') {
+                        sh 'docker build -t sukhumsae/test-app:v3 .'
+                    }
+                }
+            }
+        }
+
         stage('Push Docker Image') {
             steps {
-                sh 'docker push sukhumsae/test-app:v2'
+                script {
+                    sh 'docker push sukhumsae/test-app:v3'
+                }
             }
         }
-        stage('Helm upgrade chart'){
+
+        stage('Deploy Helm Chart') {
             steps {
-                sh 'helm upgrade --install test-app -n test-app-prod -f values.yaml .'
+                script {
+                    dir('helm-chart/test-app-chart') {
+                        sh 'helm upgrade --install test-app -n test-app -f values.yaml .'
+                    }
+                }
             }
         }
     }
