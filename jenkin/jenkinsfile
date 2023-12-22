@@ -1,26 +1,13 @@
-pipeline {
+ pipeline {
     agent any
 
     stages {
         stage('Checkout') {
             steps {
                 script {
-                    // Define your GitHub repository URL
-                    def gitRepoUrl = 'https://github.com/sukhumsae/nodejs-api-webapp.git'
-
-                    // Checkout the code from the specified repository
-                    checkout([$class: 'GitSCM', branches: [[name: '*/main']], userRemoteConfigs: [[url: gitRepoUrl]]])
+                    checkout scmGit(branches: [[name: '*/main']], extensions: [], userRemoteConfigs: [[url: 'https://github.com/sukhumsae/nodejs-api-webapp.git']])
                 }
             }
         }
-
-        stage('Build Docker Image') {
-            steps {
-                script {
-                    container ('sukhumsae/test-app:latest')
-                        sh 'docker build -t sukhumsae/test-app:latest .'
-                    }
-                }
-            }
-        }
+    }
 }
